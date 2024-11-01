@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    networks:
+      - fastapi-mongo
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_URL=mongodb://mongodb/
+      - DB_NAME=milsym_mapper
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    networks:
+      - fastapi-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+networks:
+  fastapi-mongo:
+
+volumes:
+  mongodb_data:
