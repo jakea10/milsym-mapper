@@ -1,6 +1,6 @@
 from pydantic_extra_types.coordinate import Latitude, Longitude
 import requests
-from typing import List, Iterable
+from typing import List, Iterable, Literal
 import streamlit as st
 import logging
 import time
@@ -26,6 +26,30 @@ def find_centroid(coordinates: tuple[Latitude, Longitude]) -> tuple[Latitude, Lo
 
     centroid = (lat_sum / count, lon_sum / count)
     return centroid
+
+
+def get_affilition_from_sidc(sidc: str) -> Literal["Friendly", "Hostile", "Neutral", "Unknown"]:
+    """
+    Determines unit affiliation from a MIL-STD-2525D SIDC string.
+    
+    Parameters:
+        sidc: The SIDC string
+    
+    Returns:
+        The unit affiliation ("Friendly", "Hostile", "Neutral", or "Unknown").
+    """
+    if len(sidc) >= 15:
+        affiliation_code = sidc[1]
+        if affiliation_code == "F":
+            return "Friendly"
+        elif affiliation_code == "H":
+            return "Hostile"
+        elif affiliation_code == "N":
+            return "Neutral"
+        else:
+            return "Unknown"
+    
+    return "Unknown"
 
 
 def fetch_basic_units(url: str, sample_units: Iterable[Unit] | None = None) -> List[Unit]:

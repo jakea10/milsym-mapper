@@ -2,7 +2,7 @@ import streamlit as st
 import folium
 from folium.plugins import Realtime, Fullscreen
 from streamlit_folium import st_folium
-from utils import get_cached_basic_units, find_centroid, add_unit_marker, fetch_basic_units
+from utils import get_cached_basic_units, find_centroid, add_unit_marker, fetch_basic_units, get_affilition_from_sidc
 from placeholder_data import sample_units
 import requests
 import pandas
@@ -56,10 +56,19 @@ def milsymbol_unit_map_page():
     #     # units,
     #     zoom_on_click=True,
     # ).add_to(unit_map)
+    icon_image_mapping = {
+        "Friendly": "images/milsymbol_2525D_FRIEND_Land_Unit.png",
+        "Neutral": "images/milsymbol_2525D_NEUTRAL_Land_Unit.png",
+        "Unknown": "images/milsymbol_2525D_UNKNOWN_Land_Unit.png",
+        "Hostile": "images/milsymbol_2525D_HOSTILE_Land_Unit.png",
+    }
     for unit in units:
+        icon_url = icon_image_mapping[get_affilition_from_sidc(unit.properties["sidc"])]
+        icon = folium.CustomIcon(icon_image=icon_url, icon_size=(30, 30))
         folium.Marker(
             location=unit.geometry.coordinates,
-            popup=f"Lat: {unit.geometry.coordinates.latitude}, Lon: {unit.geometry.coordinates.longitude}"
+            popup=f"Lat: {unit.geometry.coordinates.latitude}, Lon: {unit.geometry.coordinates.longitude}",
+            icon=icon
         ).add_to(unit_map)
 
     Fullscreen(
