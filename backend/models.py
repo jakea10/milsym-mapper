@@ -1,7 +1,7 @@
 from pydantic_extra_types.coordinate import Latitude, Longitude
 import sqlmodel
 from typing import Literal, Optional, Annotated, Dict, List
-from pydantic import BaseModel, ConfigDict, Field, BeforeValidator
+from pydantic import BaseModel, Field, ConfigDict, BeforeValidator
 from geojson_pydantic import Feature, Point
 
 
@@ -72,4 +72,4 @@ class UpdateUnitFeatureModel(Feature[Point, Dict]):
 
 
 class UnitFeatureCollection(BaseModel):
-    unit_features: List[UnitFeatureModel]
+    features: List[UnitFeatureModel]
