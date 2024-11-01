@@ -72,4 +72,5 @@ class UpdateUnitFeatureModel(Feature[Point, Dict]):
 
 
 class UnitFeatureCollection(BaseModel):
+    type: str = Field(default="FeatureCollection")
     features: List[UnitFeatureModel]

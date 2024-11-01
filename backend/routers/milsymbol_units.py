@@ -50,7 +50,7 @@ async def list_units(request: Request):
     async for document in cursor:
         results.append(document)
     
-    return UnitFeatureCollection(unit_features=results)
+    return UnitFeatureCollection(type="FeatureCollection", features=results)
 
 
 @router.get(

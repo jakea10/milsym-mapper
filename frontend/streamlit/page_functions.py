@@ -2,19 +2,83 @@ import streamlit as st
 import folium
 from folium.plugins import Realtime, Fullscreen
 from streamlit_folium import st_folium
-from utils import get_cached_units, find_centroid, add_unit_marker, fetch_units
+from utils import get_cached_basic_units, find_centroid, add_unit_marker, fetch_basic_units
 from placeholder_data import sample_units
 import requests
 import pandas
+import logging
+from typing import List
+from models import UnitFeatureModel
 
 
-def unit_map_page():
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
+
+def milsymbol_unit_map_page():
+    st.title("Milsym Mapper")
+    
+    # Fetch units from FastAPI
+    @st.cache_data(ttl=60)
+    def fetch_units() -> List[UnitFeatureModel]:
+        url = "http://localhost:8000/units"
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            units = [UnitFeatureModel(**data) for data in response.json()['features']]
+            return units
+        except requests.exceptions.RequestException as e:
+            logging.warning("Request failed: %s", e)
+
+    units: List[UnitFeatureModel] = fetch_units()
+
+    # Display unit details in sidebar
+    with st.sidebar:
+        st.header("Unit Details")
+        st.markdown("---")
+        for unit in units:
+            expander = st.expander(label=unit.properties["uniqueDesignation"])
+            expander.write(f"SIDC: {unit.properties['sidc']}")
+            expander.info(f"LAT: {unit.geometry.coordinates.latitude}")
+            expander.info(f"LON: {unit.geometry.coordinates.longitude}")
+
+    # Create folium map
+    all_coordinates = [(unit.geometry.coordinates) for unit in units]
+    start_location = find_centroid(all_coordinates)
+    unit_map = folium.Map(location=start_location, zoom_start=12)
+
+    # Map view layer control
+    folium.TileLayer('OpenTopoMap').add_to(unit_map)
+    folium.LayerControl().add_to(unit_map)
+
+    # folium.GeoJson(
+    #     [unit.model_dump_json() for unit in units],
+    #     # units,
+    #     zoom_on_click=True,
+    # ).add_to(unit_map)
+    for unit in units:
+        folium.Marker(
+            location=unit.geometry.coordinates,
+            popup=f"Lat: {unit.geometry.coordinates.latitude}, Lon: {unit.geometry.coordinates.longitude}"
+        ).add_to(unit_map)
+
+    Fullscreen(
+        position="topright",
+        title="Fullscreen mode",
+        title_cancel="Exit fullscreen",
+        force_separate_button=True,
+    ).add_to(unit_map)
+
+    st_folium(unit_map)
+
+
+def basic_unit_map_page():
     st.title("Unit Map")
 
     # Fetch units from FastAPI endpoint
     # TODO: Continuously pull unit data from backend
     url = "http://localhost:8000/units"
-    units = get_cached_units(url, sample_units)
+    units = get_cached_basic_units(url, sample_units)
 
     # Create folium map
     all_coordinates = [(unit.latitude, unit.longitude) for unit in units]

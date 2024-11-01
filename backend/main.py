@@ -3,13 +3,17 @@ from fastapi import FastAPI
 from motor import motor_asyncio
 from config import BaseConfig
 from routers.milsymbol_units import router as milsymbol_units_router
+import logging
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 settings = BaseConfig()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logging.info("---------- TEST ----------")
     # Starting up
     app.client = motor_asyncio.AsyncIOMotorClient(settings.DB_URL)
     app.db = app.client[settings.DB_NAME]

@@ -28,7 +28,7 @@ def find_centroid(coordinates: tuple[Latitude, Longitude]) -> tuple[Latitude, Lo
     return centroid
 
 
-def fetch_units(url: str, sample_units: Iterable[Unit] | None = None) -> List[Unit]:
+def fetch_basic_units(url: str, sample_units: Iterable[Unit] | None = None) -> List[Unit]:
     """
     Fetches units from the specified API URL.
 
@@ -72,7 +72,7 @@ def fetch_units(url: str, sample_units: Iterable[Unit] | None = None) -> List[Un
 
 
 @st.cache_data(ttl=60)  # Cache the data for 1 minute
-def get_cached_units(url: str = "http://localhost:8000/units", _sample_units: Iterable[Unit] | None = None) -> List[Unit]:
+def get_cached_basic_units(url: str = "http://localhost:8000/units", _sample_units: Iterable[Unit] | None = None) -> List[Unit]:
     """
     Retrieves units using caching for the specified API URL.
 
@@ -92,7 +92,8 @@ def get_cached_units(url: str = "http://localhost:8000/units", _sample_units: It
         list is returned if no sample units are given.
     """
     logging.info("Fetching units...")
-    return fetch_units(url, _sample_units)
+    return fetch_basic_units(url, _sample_units)
+
 
 def add_unit_marker(map_obj, unit: Unit, icon_url: str) -> folium.Marker:
     icon = folium.CustomIcon(icon_image=icon_url, icon_size=(30, 30))
